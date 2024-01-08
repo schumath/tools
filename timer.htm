@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Countdown</title>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+       <!-- <style>
+            html * {
+              font-size: 1em;
+              /*line-height: 1.625;
+              color: #2020131;*/
+              font-family: Nunito, sans-serif;
+            }
+          </style>-->
+          <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+          <script>
+            $(document).ready(function(){
+                $('#progressBar').change(function(){
+                    if(this.checked){
+                        $('#progressDiv').show();
+                    } else {
+                        $('#progressDiv').hide();
+                    }
+                });
+            });
+          </script>
+
+    </head>
+<body>
+        <div class="row" >
+            <div class="col">
+                <label for="timer" class="form-label">Gesamtzeit (Minuten):</label>
+                <input type="number" id="timer" name="timer" class="form-control">
+            </div>
+            <div class="col">
+                <label for="green" class="form-label">Gelb unter Minute:</label>
+                <input type="number" id="green" name="green" value="10" class="form-control">
+            </div>
+            <div class="col">
+                <label for="yellow" class="form-label">Orange unter Minute:</label>
+                <input type="number" id="yellow" name="yellow" value="1" class="form-control">
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
+                <button id="startButton" onclick="startTimer()" type="button" class="btn btn-primary">Start</button>
+                <button id="pauseButton" onclick="pauseTimer()" class="btn btn-secondary">Pause</button>
+                <button id="resetButton" onclick="resetTimer()" class="btn btn-danger">Zurücksetzen</button>
+            </div>
+        </div>
+
+
+
+
+
+<div class="form-check form-switch">
+    <input class="form-check-input" type="checkbox" id="progressBar" name="progressbar">
+    <label class="form-check-label" for="progressBar">Fortschritt</label>
+</div>
+
+<p id="display" style="font-size: 10em; font-weight: bold; text-align: center;"></p>
+
+<script>
+var x;
+var paused = false;
+var remaining;
+
+function startTimer() {
+  // Disable the start button
+  document.getElementById("startButton").disabled = true;
+
+  // Clear any existing timer
+  if (x) {
+    clearInterval(x);
+  }
+
+  // Get input from user
+  let timer = document.getElementById("timer").value;
+  let green = document.getElementById("green").value;
+  let yellow = document.getElementById("yellow").value;
+
+  // Convert minutes to milliseconds
+  let countDownDate = new Date().getTime() + timer * 60 * 1000;
+
+
+  // Update the count down every 1 second
+  x = setInterval(function() {
+
+    // Get today's date and time
+    let now = new Date().getTime();
+
+    // Find the distance between now and the count down time
+    let distance = countDownDate - now;
+
+    // Start date
+    let start = countDownDate - timer * 60 * 1000
+
+    // Progress
+    let progress = Math.round((now - start) / (countDownDate - start) * 1000) / 10;
+    document.getElementById("myProgress").style.width = progress + "%";
+    console.log(progress);
+
+    // Store remaining time for pause functionality
+    remaining = distance;
+
+    // Time calculations for minutes and seconds
+    let minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+    let seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+    // Change background color based on remaining time
+    if (minutes >= green) {
+      document.body.style.backgroundColor = "limegreen";
+    } else if (minutes < green && minutes >= yellow) {
+      document.body.style.backgroundColor = "gold";
+    } else if (minutes < yellow) {
+      document.body.style.backgroundColor = "darkorange";
+    }
+
+    // Display the result in the element with id="display"
+    document.getElementById("display").innerHTML = minutes + ":" + String(seconds).padStart(2, '0');
+
+    // If the count down is finished, write some text
+    if (distance < 0) {
+      clearInterval(x);
+      document.getElementById("display").innerHTML = "Ende!";
+      document.body.style.backgroundColor = "tomato";
+
+      // Enable the start button
+      document.getElementById("startButton").disabled = false;
+    }
+  }, 500);
+}
+
+function pauseTimer() {
+  if (!paused) {
+    clearInterval(x);
+    document.getElementById("pauseButton").innerHTML = "Weiter";
+    paused = true;
+  } else {
+    // Convert remaining time to a future date
+    let resumeDate = new Date().getTime() + remaining;
+
+    // Continue the timer
+    x = setInterval(function() {
+      let now = new Date().getTime();
+      let distance = resumeDate - now;
+      remaining = distance;
+      let minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+      let seconds = Math.floor((distance % (1000 * 60)) / 1000);
+      document.getElementById("display").innerHTML = minutes + ":" + String(seconds).padStart(2, '0');
+      if (distance < 0) {
+        clearInterval(x);
+        document.getElementById("display").innerHTML = "Ende!";
+        document.body.style.backgroundColor = "tomato";
+        document.getElementById("startButton").disabled = false;
+        document.getElementById("pauseButton").innerHTML = "Pause";
+        paused = false;
+      }
+    }, 500);
+    document.getElementById("pauseButton").innerHTML = "Pause";
+    paused = false;
+  }
+}
+
+function resetTimer() {
+  clearInterval(x);
+  document.getElementById("display").innerHTML = "";
+  document.body.style.backgroundColor = "white";
+  document.getElementById("startButton").disabled = false;
+  document.getElementById("pauseButton").innerHTML = "Pause";
+  paused = false;
+}
+
+
+</script>
+<div id="progressDiv" style="display: none;">
+    <div class="progress" style="height:2rem">
+        <div class="progress-bar progress-bar-striped progress-bar-animated" style="width:0%" id="myProgress"></div>
+    </div>
+</div>
+
+
+</body>
+</html>
